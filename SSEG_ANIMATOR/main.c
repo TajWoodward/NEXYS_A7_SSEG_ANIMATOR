@@ -19,6 +19,7 @@ int frame_PID = 0;
 char filename[MAX_INPUT_CHARS] = "Enter text here\0";
 int letterCount = 4;
 bool hi = true;
+bool sv = true;
 
 typedef struct _led{
 	bool on;
@@ -119,6 +120,7 @@ int main(){
   LED*   del_frm_btn = create_LED(false, 20, 355, 40, 40);
   LED*   unld_frm_btn = create_LED(false, 20, 310, 40, 40);
   LED*   ld_frm_btn = create_LED(false, 20, 260, 40, 40);
+  LED*   b_save = create_LED(false, 650, 400, 200, 40);
   LED*   b_hilo = create_LED(false, 700, 350, 80, 40);
   LED*   b_print= create_LED(false, 650, 300, 200, 40);
   int    track = 1;
@@ -156,6 +158,11 @@ int main(){
     else
     DrawText(TextFormat("CA"), 720, 350, 40, BLUE);
 
+    if(button_PRESS(b_save)){
+     sv = true; 
+     parseSEQ(s0);
+     sv = false;
+    }
 
     if(button_PRESS(nav_up)||IsKeyReleased(KEY_UP)){
       tmp = tmp->next;
@@ -210,6 +217,7 @@ DrawTriangle((Vector2){ (float)nav_dn->rect.x +5.0f, (float)nav_dn->rect.y +5.0f
     DrawText(TextFormat("#FRAME: %d", track), 100, 300, 40, BLUE);
     DrawText(TextFormat("FRAME_PID: %d", tmp->pid), 100, 350, 40, BLUE);
     DrawText(TextFormat("PRINT"), b_print->rect.x+10, b_print->rect.y, 40, BLUE);
+    DrawText(TextFormat("SAVE"), b_save->rect.x+10, b_save->rect.y, 40, BLUE);
 		EndDrawing();
 	}
   UnloadTexture(trash);
@@ -622,9 +630,9 @@ FILE *ffptr;
     printf("Error removing file\n");
   
   ffptr = fopen(filename, "a");
-  if(hi)
+  if(hi && !sv)
     fprintf(ffptr, "hi\n");
-  else
+  else if(!sv)
     fprintf(ffptr, "lo\n");
   fclose(ffptr);
 
