@@ -18,8 +18,8 @@ int OFFSET_Y = 200;
 int frame_PID = 0;
 char filename[MAX_INPUT_CHARS] = "Enter text here\0";
 int letterCount = 4;
-bool hi = true;
-bool sv = true;
+bool hi = false;
+bool sv = false;
 
 typedef struct _led{
 	bool on;
@@ -640,6 +640,9 @@ FILE *ffptr;
     parseFRAME(tmp);
     tmp = tmp->next;
   } while(tmp != n0->head);
+  ffptr = fopen(filename, "a");
+  fprintf(ffptr, "\b");
+  fclose(ffptr);
 }
 
 void add_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
@@ -699,7 +702,7 @@ FILE* fptr= fopen(filename, "r");
 char buff[80];
 unload_seq(n0, n0->head); 
 printf("success unload\n");
-
+bool flip;
 if(fptr == NULL){
     printf("Couldn't read file\n");
     return -1;
@@ -707,13 +710,17 @@ if(fptr == NULL){
     printf("File Read\nLoading File\n");
 int count = 0;
 
-while(fgets(buff, 80, fptr))
+while(fgets(buff, 80, fptr)){
+    if(buff[0] == 'h' ||buff[0] == 'l')
+      flip = true;
     ++count;
+}
 fclose(fptr);
+printf("Animation has %d frames\n", count);
 FRAME* tmp_f = n0->head;
 SSEG* tmp_s = tmp_f->head;
 LED* tmp_l = tmp_s->head;
-for(int i = 1; i < count-1; ++i){
+for(int i = 1; i < count-(int)flip; ++i){
   FRAME* tmp = create_FRAME();
   printf("FRAME CREATED\n");
   initialize_FRAME(tmp, OFFSET_X, OFFSET_Y);
