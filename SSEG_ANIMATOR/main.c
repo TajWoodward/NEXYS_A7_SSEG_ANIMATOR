@@ -17,7 +17,6 @@ int OFFSET_X = 87;
 int OFFSET_Y = 200;
 int frame_PID = 0;
 char filename[MAX_INPUT_CHARS] = "Enter text here\0";
-int letterCount = 4;
 bool hi = false;
 bool sv = false;
 
@@ -584,9 +583,13 @@ SSEG* tmp = n0->head;
 }
 
 void getFilename(){
-
-
+  int letterCount = 0;
   while(IsKeyUp(KEY_ENTER)){
+    while(filename[letterCount] != '\0') ++letterCount;
+    
+    if(IsKeyPressed(KEY_ESCAPE)){
+        break;
+    }
 
     if(IsFileDropped()){
      FilePathList droppedFiles = LoadDroppedFiles();
@@ -641,7 +644,6 @@ FILE *ffptr;
     tmp = tmp->next;
   } while(tmp != n0->head);
   ffptr = fopen(filename, "a");
-  fprintf(ffptr, "\b");
   fclose(ffptr);
 }
 
