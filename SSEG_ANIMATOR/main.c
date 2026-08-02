@@ -188,7 +188,7 @@ int main(){
     unload_FRAME_BUTTON(unld_frm_btn, s0, tmp);
     load_FRAME_BUTTON(ld_frm_btn, s0, tmp);
     
-    if(button_PRESS(add_frm_btn)){
+    if(button_PRESS(add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
         tmp = tmp->next;
         track++;
     }
@@ -661,9 +661,8 @@ void add_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
 }
 
 void del_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)){
+	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)||IsKeyReleased(KEY_KP_SUBTRACT)){
+		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)||IsKeyReleased(KEY_KP_SUBTRACT)){
 			n0->light = RED;
      printf("%d\n",del_FRAME_IN(seq, place)) ;
     }
