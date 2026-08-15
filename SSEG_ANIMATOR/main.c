@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define RAYGUI_IMPLMENTATION
 #include "raylib.h"
+#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 //#include "rlgl.h"
 
