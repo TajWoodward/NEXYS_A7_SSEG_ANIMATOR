@@ -10,7 +10,7 @@ module top#(parameter string memory = "foo.mem", parameter DW = 64, parameter AW
     logic [7:0] num_wire;
     logic [AW-1:0] count;
     logic [DW-1:0] data;
-    mod_counter #(.N(20)) sel_tick (.clk(clk),.MAX(20'h186a0),.en(1'b1),.max_tick(sel_count));
+	mod_counter #(.N(20)) sel_tick (.clk(clk),.MAX(20'h30d4),.en(1'b1),.max_tick(sel_count));
     mod_counter #(.N(4)) sel_in (.clk(sel_count),.MAX(4'h8),.en(1'b1),.count(sel),.max_tick(tick));
     mod_counter #(.N(32)) fps (.clk(tick),.MAX(32'd50),.en(1'b1),.max_tick(frame_tick));
     mod_counter #(.N(AW)) frame (.clk(frame_tick),.MAX(AW+1),.en(1'b1),.count(count));
