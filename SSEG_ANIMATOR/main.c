@@ -5,8 +5,6 @@
 #include "raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-//#include "rlgl.h"
-
 #define MAX_FILEPATH_SIZE 2048
 #define MAX_FILEPATH_RECORDED 4096 
 #define MAX_INPUT_CHARS 2048 
@@ -88,40 +86,39 @@ int add_FRAME_IN (SEQ*, FRAME*, FRAME*);
 
 int del_FRAME_IN (SEQ*, FRAME*);
 
-int button_PRESS(LED*);
-
 void parseSSEG(SSEG*);
 
 void parseFRAME(FRAME*);
 
 void parseSEQ(SEQ*);
 
-void add_FRAME_BUTTON(LED*, SEQ*, FRAME*);
+void add_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
-void del_FRAME_BUTTON(LED*, SEQ*, FRAME*);
+void del_FRAME_BUTTON(bool , SEQ*, FRAME*);
 
 int unload_seq(SEQ*, FRAME*);
 
-void unload_FRAME_BUTTON(LED*, SEQ*, FRAME*);
+void unload_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
 int load_seq(SEQ*);
 
-void load_FRAME_BUTTON(LED*, SEQ*, FRAME*);
+void load_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
 void getFilename();
 
 int main(){
   SEQ*   s0 = create_SEQ();
 	FRAME* n0 = create_FRAME();
-  LED*   add_frm_btn = create_LED(false, 20, 400, 40, 40);
-  LED*   nav_up = create_LED(false, 600, 300, 40, 40);
-  LED*   nav_dn = create_LED(false, 600, 350, 40, 40);
-  LED*   del_frm_btn = create_LED(false, 20, 355, 40, 40);
-  LED*   unld_frm_btn = create_LED(false, 20, 310, 40, 40);
-  LED*   ld_frm_btn = create_LED(false, 20, 260, 40, 40);
-  LED*   b_save = create_LED(false, 650, 400, 200, 40);
-  LED*   b_hilo = create_LED(false, 700, 350, 80, 40);
-  LED*   b_print= create_LED(false, 650, 300, 200, 40);
+  bool   add_frm_btn =  false;
+  bool   nav_up =  false;
+  bool   nav_dn =  false;
+  bool   del_frm_btn =  false;
+  bool   unld_frm_btn =  false;
+  bool   ld_frm_btn =  false;
+  bool   b_save =  false;
+  bool   b_hilo =  false;
+  bool   b_print=  false;
+
   int    track = 1;
 	initialize_FRAME(n0, OFFSET_X, OFFSET_Y);
   add_FRAME_IN(s0,NULL, n0);
@@ -132,7 +129,7 @@ int main(){
   Texture2D load  = LoadTexture("textures/load.png");
     
 	while(!WindowShouldClose()){
-    if(button_PRESS(del_frm_btn)){
+    if(del_frm_btn){
       tmp = tmp->back;
       printf("CURRENT FRAME: %d\n", tmp->pid);
       if (tmp == s0->head)
@@ -141,7 +138,7 @@ int main(){
       --track;
     }
 
-    if(button_PRESS(unld_frm_btn)){
+    if(unld_frm_btn){
       tmp = s0->head;
       printf("CURRENT FRAME: %d\n", tmp->pid);
       if (tmp == s0->head)
@@ -149,21 +146,17 @@ int main(){
       else
       ++track;
     }
-    if(button_PRESS(b_hilo)){
+    if(b_hilo){
     hi = !hi; 
     }
-    if(hi)
-    DrawText(TextFormat("CC"), 720, 350, 40, BLUE);
-    else
-    DrawText(TextFormat("CA"), 720, 350, 40, BLUE);
-
-    if(button_PRESS(b_save)){
+    
+    if(b_save){
      sv = true; 
      parseSEQ(s0);
      sv = false;
     }
 
-    if(button_PRESS(nav_up)||IsKeyReleased(KEY_UP)){
+    if(nav_up||IsKeyReleased(KEY_UP)){
       tmp = tmp->next;
       printf("CURRENT FRAME: %d\n", tmp->pid);
       if (tmp == s0->head)
@@ -171,7 +164,7 @@ int main(){
       else
       ++track;
     }
-    if(button_PRESS(nav_dn)||IsKeyReleased(KEY_DOWN)){
+    if(nav_dn||IsKeyReleased(KEY_DOWN)){
       tmp = tmp->back;
       printf("CURRENT FRAME: %d\n", tmp->pid);
       if (tmp == s0->head)
@@ -182,41 +175,46 @@ int main(){
       --track;
     }
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
+    ClearBackground(RAYWHITE);
+	  add_frm_btn = GuiButton((Rectangle){20, 355, 40, 40}, "#239#");
+    nav_up = GuiButton((Rectangle){600, 300, 40, 40},"");
+    nav_dn = GuiButton((Rectangle){600, 350, 40, 40},"");
+    del_frm_btn = GuiButton((Rectangle){20, 400, 40, 40}, "#240#");
+    unld_frm_btn = GuiButton((Rectangle){20, 310, 40, 40},"");
+    ld_frm_btn = GuiButton((Rectangle){20, 260, 40, 40},"");
+    b_save = GuiButton((Rectangle){650, 400, 80, 40}, "EXPORT"); 
+    if(hi) 
+      b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CC");
+    else
+      b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CA");
+    b_print= GuiButton((Rectangle){650, 300, 80, 40}, "SAVE");
     add_FRAME_BUTTON(add_frm_btn, s0, tmp);
     del_FRAME_BUTTON(del_frm_btn, s0, tmp);
     unload_FRAME_BUTTON(unld_frm_btn, s0, tmp);
     load_FRAME_BUTTON(ld_frm_btn, s0, tmp);
-    
-    if(button_PRESS(add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
+  
+     
+
+    if((add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
         tmp = tmp->next;
         track++;
     }
-    if(button_PRESS(b_print)){
+    if((b_print)){
         parseSEQ(s0);
     }
-    DrawRectangleRec(nav_dn->rect, nav_dn->light);
-    DrawRectangleRec(nav_up->rect, nav_up->light);
-    DrawRectangleRec(add_frm_btn->rect, add_frm_btn->light);
-    DrawRectangleRec(del_frm_btn->rect, del_frm_btn->light);
-    DrawRectangleRec(unld_frm_btn->rect, unld_frm_btn->light);
-    DrawRectangleRec(ld_frm_btn->rect, ld_frm_btn->light);
-
+    
+DrawTriangle((Vector2){ (float)600 + 20.0f, (float)300 +5.0f },
+             (Vector2){ (float)600 +5.0f, (float)300 +35.0f },
+             (Vector2){ (float)600 +35.0f, (float)300 +35.0f }, BLACK);
+DrawTriangle((Vector2){ (float)600 +5.0f, (float)350 +5.0f },
+             (Vector2){ (float)600 +20.0f, (float)350 +35.0f },
+             (Vector2){ (float)600 +35.0f, (float)350 +5.0f }, BLACK);
     DrawTexture(trash, 20,310, WHITE);
     DrawTexture(load, 20,260, WHITE);
-DrawTriangle((Vector2){ (float)nav_up->rect.x + 20.0f, (float)nav_up->rect.y +5.0f },
-             (Vector2){ (float)nav_up->rect.x +5.0f, (float)nav_up->rect.y +35.0f },
-             (Vector2){ (float)nav_up->rect.x +35.0f, (float)nav_up->rect.y +35.0f }, BLACK);
-DrawTriangle((Vector2){ (float)nav_dn->rect.x +5.0f, (float)nav_dn->rect.y +5.0f },
-             (Vector2){ (float)nav_dn->rect.x +20.0f, (float)nav_dn->rect.y +35.0f },
-             (Vector2){ (float)nav_dn->rect.x +35.0f, (float)nav_dn->rect.y +5.0f }, BLACK);
+
 		draw_FRAME(tmp);
-    DrawText("+", 30, add_frm_btn->rect.y, 40, BLACK);
-    DrawText("-", 30, del_frm_btn->rect.y, 40, BLACK);
     DrawText(TextFormat("#FRAME: %d", track), 100, 300, 40, BLUE);
     DrawText(TextFormat("FRAME_PID: %d", tmp->pid), 100, 350, 40, BLUE);
-    DrawText(TextFormat("PRINT"), b_print->rect.x+10, b_print->rect.y, 40, BLUE);
-    DrawText(TextFormat("SAVE"), b_save->rect.x+10, b_save->rect.y, 40, BLUE);
 		EndDrawing();
 	}
   UnloadTexture(trash);
@@ -250,6 +248,7 @@ LED* create_LED(bool status, float posx, float posy, float w, float h){
 	result->next = NULL;
 	return result;
 }
+
 
 SSEG* create_new_SSEG(){
 	SSEG* n0;
@@ -489,12 +488,12 @@ int add_FRAME_IN (SEQ* digit, FRAME* place, FRAME* node){
     printf("FRAME OR SEQ NULL\n");
 		return -1;
   }
-	if(digit->head == NULL /*|| digit->tail == NULL*/){
+	if(digit->head == NULL){
 		add_FRAME_LAST(digit, node); 
 	  ++digit->count;
     printf("FRAME ADDED TO LAST\n");
 		return 0;
-	}else if(place == NULL /*|| digit->tail == NULL*/){
+	}else if(place == NULL){
 		add_FRAME_LAST(digit, node); 
 	  ++digit->count;
     printf("FRAME ADDED TO LAST\n");
@@ -539,18 +538,6 @@ int del_FRAME_IN (SEQ* digit, FRAME* place){
   	  --digit->count;
     printf("FRAME DELETED\n");	
     return 3;
-}
-
-int button_PRESS(LED* n0){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)){
-			n0->light = RED;
-      return 1;
-    }
-	}	
-			n0->light = GRAY;
-  return 0;
 }
 
 void parseSSEG(SSEG* n0){
@@ -647,28 +634,19 @@ FILE *ffptr;
   fclose(ffptr);
 }
 
-void add_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)||IsKeyReleased(KEY_KP_ADD)){
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)||IsKeyReleased(KEY_KP_ADD)){
-			n0->light = RED;
+void add_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+		if(n0||IsKeyReleased(KEY_KP_ADD)){
       FRAME* tmp = create_FRAME();
       initialize_FRAME(tmp, OFFSET_X, OFFSET_Y);
      printf("%d\n",add_FRAME_IN(seq, place, tmp)) ;
     }
-      
-	}	
-			n0->light = GRAY;
+		
 }
 
-void del_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)||IsKeyReleased(KEY_KP_SUBTRACT)){
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)||IsKeyReleased(KEY_KP_SUBTRACT)){
-			n0->light = RED;
+void del_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+		if((n0)||IsKeyReleased(KEY_KP_SUBTRACT)){
      printf("%d\n",del_FRAME_IN(seq, place)) ;
     }
-      
-	}	
-			n0->light = GRAY;
 }
 
 int unload_seq(SEQ* seq, FRAME* frame){
@@ -681,20 +659,26 @@ int unload_seq(SEQ* seq, FRAME* frame){
   seq->head->next = seq->head;
   seq->head->back = seq->head;
   seq->count = 1;
-  
+  SSEG* tmp_sseg = seq->head->head;
+  LED* tmp_led = seq->head->head->head;
+  while(tmp_sseg != NULL){
+    while(tmp_led != NULL){
+      tmp_led->on = false;
+      tmp_led = tmp_led->next;
+    }
+      if(tmp_sseg->next != NULL)  
+      tmp_sseg = tmp_sseg->next;
+      else
+      break;
+      tmp_led = tmp_sseg->head;
+  } 
   return 0;
 }
 
-void unload_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)){
-			n0->light = RED;
+void unload_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+		if(n0){
      printf("unload\n",unload_seq(seq, place)) ;
     }
-      
-	}	
-			n0->light = GRAY;
 }
 
 int load_seq(SEQ* n0){
@@ -776,15 +760,9 @@ while(fgets(buff, 80, fptr)){
   return 0;
 }
 
-void load_FRAME_BUTTON(LED* n0, SEQ* seq, FRAME* place){
-	if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
-
-		if(CheckCollisionPointRec(GetMousePosition(),n0->rect)){
-			n0->light = RED;
+void load_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+		if(n0){
      printf("load\n",load_seq(seq)) ;
     }
-      
-	}	
-			n0->light = GRAY;
 }
 
