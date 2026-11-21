@@ -125,8 +125,6 @@ int main(){
 	InitWindow(screenWidth, screenHeight, "sseg_animator");
 	SetTargetFPS(60);
   FRAME* tmp = s0->head;
-  Texture2D trash = LoadTexture("textures/trash.png");
-  Texture2D load  = LoadTexture("textures/load.png");
     
 	while(!WindowShouldClose()){
     if(del_frm_btn){
@@ -177,11 +175,11 @@ int main(){
 		BeginDrawing();
     ClearBackground(RAYWHITE);
 	  add_frm_btn = GuiButton((Rectangle){20, 355, 40, 40}, "#239#");
-    nav_up = GuiButton((Rectangle){600, 300, 40, 40},"");
-    nav_dn = GuiButton((Rectangle){600, 350, 40, 40},"");
+    nav_up = GuiButton((Rectangle){600, 300, 40, 40},"#117#");
+    nav_dn = GuiButton((Rectangle){600, 350, 40, 40},"#116#");
     del_frm_btn = GuiButton((Rectangle){20, 400, 40, 40}, "#240#");
-    unld_frm_btn = GuiButton((Rectangle){20, 310, 40, 40},"");
-    ld_frm_btn = GuiButton((Rectangle){20, 260, 40, 40},"");
+    unld_frm_btn = GuiButton((Rectangle){20, 310, 40, 40},"#143#");
+    ld_frm_btn = GuiButton((Rectangle){20, 260, 40, 40},"#3#");
     b_save = GuiButton((Rectangle){650, 400, 80, 40}, "EXPORT"); 
     if(hi) 
       b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CC");
@@ -193,10 +191,6 @@ int main(){
     unload_FRAME_BUTTON(unld_frm_btn, s0, tmp);
     load_FRAME_BUTTON(ld_frm_btn, s0, tmp);
   
-    DrawTexture(trash, 20,310, WHITE);
-    DrawTexture(load, 20,260, WHITE);
-     
-
     if((add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
         tmp = tmp->next;
         track++;
@@ -204,21 +198,12 @@ int main(){
     if((b_print)){
         parseSEQ(s0);
     }
-    
-DrawTriangle((Vector2){ (float)600 + 20.0f, (float)300 +5.0f },
-             (Vector2){ (float)600 +5.0f, (float)300 +35.0f },
-             (Vector2){ (float)600 +35.0f, (float)300 +35.0f }, BLACK);
-DrawTriangle((Vector2){ (float)600 +5.0f, (float)350 +5.0f },
-             (Vector2){ (float)600 +20.0f, (float)350 +35.0f },
-             (Vector2){ (float)600 +35.0f, (float)350 +5.0f }, BLACK);
-
+ 
 		draw_FRAME(tmp);
     DrawText(TextFormat("#FRAME: %d", track), 100, 300, 40, BLUE);
-    DrawText(TextFormat("FRAME_PID: %d", tmp->pid), 100, 350, 40, BLUE);
+    DrawText(TextFormat("%d/%d", track, s0->count), 100, 350, 40, BLUE);
 		EndDrawing();
 	}
-  UnloadTexture(trash);
-  UnloadTexture(load);
 	CloseWindow();
 	free(n0);
 
