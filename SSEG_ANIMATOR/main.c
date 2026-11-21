@@ -193,6 +193,8 @@ int main(){
     unload_FRAME_BUTTON(unld_frm_btn, s0, tmp);
     load_FRAME_BUTTON(ld_frm_btn, s0, tmp);
   
+    DrawTexture(trash, 20,310, WHITE);
+    DrawTexture(load, 20,260, WHITE);
      
 
     if((add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
@@ -209,8 +211,6 @@ DrawTriangle((Vector2){ (float)600 + 20.0f, (float)300 +5.0f },
 DrawTriangle((Vector2){ (float)600 +5.0f, (float)350 +5.0f },
              (Vector2){ (float)600 +20.0f, (float)350 +35.0f },
              (Vector2){ (float)600 +35.0f, (float)350 +5.0f }, BLACK);
-    DrawTexture(trash, 20,310, WHITE);
-    DrawTexture(load, 20,260, WHITE);
 
 		draw_FRAME(tmp);
     DrawText(TextFormat("#FRAME: %d", track), 100, 300, 40, BLUE);
