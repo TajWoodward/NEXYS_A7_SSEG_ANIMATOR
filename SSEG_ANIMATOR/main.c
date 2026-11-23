@@ -92,17 +92,17 @@ void parseFRAME(FRAME*);
 
 void parseSEQ(SEQ*);
 
-void add_FRAME_BUTTON(bool, SEQ*, FRAME*);
+int add_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
-void del_FRAME_BUTTON(bool , SEQ*, FRAME*);
+int del_FRAME_BUTTON(bool , SEQ*, FRAME*);
 
 int unload_seq(SEQ*, FRAME*);
 
-void unload_FRAME_BUTTON(bool, SEQ*, FRAME*);
+int unload_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
 int load_seq(SEQ*);
 
-void load_FRAME_BUTTON(bool, SEQ*, FRAME*);
+int load_FRAME_BUTTON(bool, SEQ*, FRAME*);
 
 void getFilename();
 
@@ -118,8 +118,11 @@ int main(){
   bool   b_save =  false;
   bool   b_hilo =  false;
   bool   b_print=  false;
+  bool   load_error, add_notif, del_notif, unload_notif, load_notif, save_notif, export_notif;
+  load_error = add_notif = del_notif = unload_notif = load_notif = save_notif = export_notif = false;
 
   int    track = 1;
+  int frameCounter = 0;
 	initialize_FRAME(n0, OFFSET_X, OFFSET_Y);
   add_FRAME_IN(s0,NULL, n0);
 	InitWindow(screenWidth, screenHeight, "sseg_animator");
@@ -152,6 +155,7 @@ int main(){
      sv = true; 
      parseSEQ(s0);
      sv = false;
+     export_notif = true;
     }
 
     if(nav_up||IsKeyReleased(KEY_UP)){
@@ -181,15 +185,58 @@ int main(){
     unld_frm_btn = GuiButton((Rectangle){20, 310, 40, 40},"#143#");
     ld_frm_btn = GuiButton((Rectangle){20, 260, 40, 40},"#3#");
     b_save = GuiButton((Rectangle){650, 400, 80, 40}, "EXPORT"); 
+    b_print= GuiButton((Rectangle){650, 300, 80, 40}, "SAVE");
+
     if(hi) 
       b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CC");
     else
-      b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CA");
-    b_print= GuiButton((Rectangle){650, 300, 80, 40}, "SAVE");
-    add_FRAME_BUTTON(add_frm_btn, s0, tmp);
-    del_FRAME_BUTTON(del_frm_btn, s0, tmp);
-    unload_FRAME_BUTTON(unld_frm_btn, s0, tmp);
-    load_FRAME_BUTTON(ld_frm_btn, s0, tmp);
+     b_hilo = GuiButton((Rectangle){650, 350, 80, 40},"CA");
+
+
+    switch(load_FRAME_BUTTON(ld_frm_btn, s0, tmp)){
+      case -1: load_error = true;
+    
+      case 1:  load_notif = true;
+
+      default: ;
+    }
+
+    if(add_FRAME_BUTTON(add_frm_btn, s0, tmp))
+      add_notif = true;
+    
+    if(del_FRAME_BUTTON(del_frm_btn, s0, tmp))
+      del_notif = true;
+
+    if(unload_FRAME_BUTTON(unld_frm_btn, s0, tmp))
+      unload_notif = true;
+
+    if(frameCounter <= 60 && load_error){
+      DrawText(TextFormat("error: unexpected file"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter <= 60 && add_notif){
+      DrawText(TextFormat("frame added"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter < 60 && del_notif){
+      DrawText(TextFormat("frame deleted"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter <= 60 && load_notif){
+      DrawText(TextFormat("animation has been loaded"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter <= 60 && unload_notif){
+      DrawText(TextFormat("animation has been unloaded"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter <= 60 && export_notif){
+      DrawText(TextFormat("exported animation"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else if(frameCounter <= 60 && save_notif){
+      DrawText(TextFormat("animation is saved"), 100, 400, 40, RED);
+      ++frameCounter;
+    }else{
+      DrawRectangle(100, 400, 100, 40, RAYWHITE);
+      frameCounter = 0;
+      load_error = add_notif = del_notif = unload_notif = load_notif = save_notif = export_notif =false;
+    }
+    
   
     if((add_frm_btn)||IsKeyReleased(KEY_KP_ADD)){
         tmp = tmp->next;
@@ -197,11 +244,11 @@ int main(){
     }
     if((b_print)){
         parseSEQ(s0);
+        save_notif = true;
     }
  
 		draw_FRAME(tmp);
-    DrawText(TextFormat("#FRAME: %d", track), 100, 300, 40, BLUE);
-    DrawText(TextFormat("%d/%d", track, s0->count), 100, 350, 40, BLUE);
+    DrawText(TextFormat("FRAME: %d/%d", track, s0->count), 100, 350, 40, BLUE);
 		EndDrawing();
 	}
 	CloseWindow();
@@ -477,7 +524,7 @@ int add_FRAME_IN (SEQ* digit, FRAME* place, FRAME* node){
 		add_FRAME_LAST(digit, node); 
 	  ++digit->count;
     printf("FRAME ADDED TO LAST\n");
-		return 0;
+		return 1;
 	}else if(place == NULL){
 		add_FRAME_LAST(digit, node); 
 	  ++digit->count;
@@ -619,19 +666,22 @@ FILE *ffptr;
   fclose(ffptr);
 }
 
-void add_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+int add_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
 		if(n0||IsKeyReleased(KEY_KP_ADD)){
       FRAME* tmp = create_FRAME();
       initialize_FRAME(tmp, OFFSET_X, OFFSET_Y);
      printf("%d\n",add_FRAME_IN(seq, place, tmp)) ;
+    return 1;
     }
-		
+	return 0;	
 }
 
-void del_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+int del_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
 		if((n0)||IsKeyReleased(KEY_KP_SUBTRACT)){
      printf("%d\n",del_FRAME_IN(seq, place)) ;
+    return 1;
     }
+  return 0;
 }
 
 int unload_seq(SEQ* seq, FRAME* frame){
@@ -660,10 +710,12 @@ int unload_seq(SEQ* seq, FRAME* frame){
   return 0;
 }
 
-void unload_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+int unload_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
 		if(n0){
      printf("unload\n",unload_seq(seq, place)) ;
+    return 1;
     }
+  return 0;
 }
 
 int load_seq(SEQ* n0){
@@ -672,7 +724,8 @@ FILE* fptr= fopen(filename, "r");
 char buff[80];
 unload_seq(n0, n0->head); 
 printf("success unload\n");
-bool flip;
+int ledCount;
+bool flip = false;
 if(fptr == NULL){
     printf("Couldn't read file\n");
     return -1;
@@ -700,6 +753,7 @@ for(int i = 1; i < count-(int)flip; ++i){
   }
 fptr= fopen(filename, "r");
 while(fgets(buff, 80, fptr)){
+  ledCount = 0;
     if(buff[0] == 'h'){
       hi = true;
       printf("hi\n");
@@ -710,6 +764,20 @@ while(fgets(buff, 80, fptr)){
     }
     else{
      for(int i = 0; buff[i] != '\n'; ++i){
+      if(buff[i] == ' '){
+        if(tmp_s->next != NULL)
+          tmp_s = tmp_s->next;
+        printf(" ");
+        tmp_l = tmp_s->head;
+        ledCount = 0;
+        continue;
+      }else if(ledCount == 8){
+        if(tmp_s->next != NULL)
+          tmp_s = tmp_s->next;
+        tmp_l = tmp_s->head;
+        printf(" %d ", ledCount);
+        ledCount = 0;
+      }
       if(buff[i] == '1'){
         if(hi)
           tmp_l->on = true;
@@ -717,22 +785,24 @@ while(fgets(buff, 80, fptr)){
           tmp_l->on = false;
         printf("1");
         if(tmp_l->next != NULL)
-        tmp_l = tmp_l->next;
-      }
-      else if(buff[i] == '0'){
+          tmp_l = tmp_l->next;
+        ++ledCount;
+        continue;
+      }else if(buff[i] == '0'){
         if(hi)
           tmp_l->on = false;
         else
           tmp_l->on = true;
         printf("0");
         if(tmp_l->next != NULL)
-        tmp_l = tmp_l->next;
+          tmp_l = tmp_l->next;
+        ++ledCount;
+        continue;
       }
-      if(buff[i] == ' '){
-        if(tmp_s->next != NULL)
-        tmp_s = tmp_s->next;
-        printf(" ");
-        tmp_l = tmp_s->head;
+      else if(buff[i] != '\n'){
+        printf("Error reading file, unexpect contents\n");
+        unload_seq(n0, n0->head);
+        return -1;
       }
     }
   tmp_f = tmp_f->next;
@@ -742,12 +812,14 @@ while(fgets(buff, 80, fptr)){
   }
 } 
   fclose(fptr);
-  return 0;
+  return 1;
 }
 
-void load_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
+int load_FRAME_BUTTON(bool n0, SEQ* seq, FRAME* place){
 		if(n0){
      printf("load\n",load_seq(seq)) ;
+    return load_seq(seq);
     }
+  return 0;
 }
 
